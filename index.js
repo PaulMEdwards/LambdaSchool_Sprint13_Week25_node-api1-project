@@ -71,14 +71,15 @@ server.post('/api/users', (req, res) => {
   //#endregion Post Summary
 
   if (!req.body.name || !req.body.bio) {
-    res.status(500).json({ success: false, message: "Please provide name and bio for the user." });
+    res.status(400).json({ success: false, message: "Please provide name and bio for the user." });
   } else {
     db.insert(req.body)
       .then(user => {
-        res.status(201).json({ success: true, user });
+        console.log(`POST /api/users/ insert(): \n`, user);
+        res.status(201).json({ success: true, user: user });
       })
       .catch(err => {
-        res.status(500).json({ success: false, err });
+        res.status(500).json({ success: false, errorMessage: err });
       });
   }
 });
@@ -96,6 +97,7 @@ server.get('/api/users', (req, res) => {
 
   db.find()
     .then(users => {
+      console.log(`GET /api/users/ find(): \n`, users);
       res.status(200).json({ success: true, users });
     })
     .catch(err => {
@@ -122,12 +124,12 @@ server.get('/api/users/:id', (req, res) => {
   const { id } = req.params;
 
   db.findById(id)
-    .then(users => {
-      // console.log(`GET /api/users/:id findById(${id}): \n`, users);
-      if (users) {
-        res.status(200).json({ success: true, users });
+    .then(user => {
+      console.log(`GET /api/users/:id findById(${id}): \n`, users);
+      if (user) {
+        res.status(200).json({ success: true, user });
       } else {
-        res.status(500).json({ success: false, errorMessage: "The user with the specified ID does not exist." });
+        res.status(404).json({ success: false, errorMessage: "The user with the specified ID does not exist." });
       }
     })
     .catch(err => {
@@ -136,6 +138,7 @@ server.get('/api/users/:id', (req, res) => {
 });
 
 server.put('/api/users/:id', (req, res) => {
+  //#region Update User Summary
   /*
     When the client makes a `PUT` request to `/api/users/:id`:
 
@@ -160,9 +163,35 @@ server.put('/api/users/:id', (req, res) => {
       - respond with HTTP status code `200` (OK).
       - return the newly updated _user document_.
   */
- });
+  //#endregion Update User Summary
+
+  const { id } = req.params;
+
+  if (!req.body.name || !req.body.bio) {
+    res.status(400).json({ success: false, message: "Please provide name and bio for the user." });
+  } else {
+    db.findById(id)
+      .then(user => {
+        if (user) {
+          db.update(id, req.body)
+          .then(userIdUpdated => {
+            console.log(`PUT /api/users/:id update(${id}): \n`, userIdUpdated);
+            if (userIdUpdated) {
+              res.status(200).json({ success: true, userIdUpdated: userIdUpdated });
+            }
+          })
+          .catch(err => {
+            res.status(500).json({ success: false, errorMessage: "The user information could not be modified." });
+          });
+        } else {
+          res.status(404).json({ success: false, errorMessage: "The user with the specified ID does not exist." });
+        }
+    });
+  }
+});
 
 server.delete('/api/users/:id', (req, res) => {
+  //#region Delete User Summary
   /*
     When the client makes a `DELETE` request to `/api/users/:id`:
 
@@ -175,4 +204,25 @@ server.delete('/api/users/:id', (req, res) => {
       - respond with HTTP status code `500`.
       - return the following JSON object: `{ errorMessage: "The user could not be removed" }`.
   */
- });
+  //#endregion Delete User Summary
+
+  const { id } = req.params;
+
+  db.findById(id)
+    .then(user => {
+      if (user) {
+        db.remove(id, req.body)
+        .then(userIdRemoved => {
+          console.log(`DELETE /api/users/:id remove(${id}): \n`, userIdRemoved);
+          if (userIdRemoved) {
+            res.status(200).json({ success: true, userIdRemoved: userIdRemoved });
+          }
+        })
+        .catch(err => {
+          res.status(500).json({ success: false, errorMessage: "The user information could not be removed." });
+        });
+      } else {
+        res.status(404).json({ success: false, errorMessage: "The user with the specified ID does not exist." });
+      }
+    });
+});
