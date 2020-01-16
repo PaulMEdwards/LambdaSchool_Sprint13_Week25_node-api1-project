@@ -1,8 +1,12 @@
 const express = require('express');
 
 const server = express();
+server.use(express.json());
+// server.use(cors());
 
-const port = 4000;
+const db = require("./data/db.js");
+
+const port = process.env.PORT || 4000;
 server.listen(port, () => {
   console.log('*** listening on port '+port);
 });
@@ -34,6 +38,7 @@ server.get('/now', (req, res) => {
   res.send(a.toString());
 });
 
+//#region Summary of All Endpoints
 /*
 | POST   | /api/users     | Creates a user using the information sent inside the `request body`.                                                              |
 | GET    | /api/users     | Returns an array of all the user objects contained in the database.                                                               |
@@ -41,8 +46,10 @@ server.get('/now', (req, res) => {
 | PUT    | /api/users/:id | Updates the user with the specified `id` using data from the `request body`. Returns the modified document, **NOT the original**. |
 | DELETE | /api/users/:id | Removes the user with the specified `id` and returns the deleted user.                                                            |
 */
+//#endregion Summary of All Endpoints
 
 server.post('/api/users', (req, res) => {
+  //#region Post Summary
   /*
     When the client makes a `POST` request to `/api/users`:
 
@@ -61,9 +68,23 @@ server.post('/api/users', (req, res) => {
       - respond with HTTP status code `500` (Server Error).
       - return the following JSON object: `{ errorMessage: "There was an error while saving the user to the database" }`.
   */
+  //#endregion Post Summary
+
+  if (!req.body.name || !req.body.bio) {
+    res.status(500).json({ success: false, message: "Please provide name and bio for the user." });
+  } else {
+    db.insert(req.body)
+      .then(user => {
+        res.status(201).json({ success: true, user });
+      })
+      .catch(err => {
+        res.status(500).json({ success: false, err });
+      });
+  }
 });
 
 server.get('/api/users', (req, res) => {
+  //#region Get All Users Summary
   /*
     When the client makes a `GET` request to `/api/users`:
 
@@ -71,9 +92,19 @@ server.get('/api/users', (req, res) => {
       - respond with HTTP status code `500`.
       - return the following JSON object: `{ errorMessage: "The users information could not be retrieved." }`.
   */
- });
+  //#endregion Get All Users Summary
+
+  db.find()
+    .then(users => {
+      res.status(200).json({ success: true, users });
+    })
+    .catch(err => {
+      res.status(500).json({ success: false, errorMessage: "The users information could not be retrieved." });
+    });
+});
 
 server.get('/api/users/:id', (req, res) => {
+  //#region Get Single User By Id Summary
   /*
     When the client makes a `GET` request to `/api/users/:id`:
 
@@ -86,7 +117,23 @@ server.get('/api/users/:id', (req, res) => {
       - respond with HTTP status code `500`.
       - return the following JSON object: `{ errorMessage: "The user information could not be retrieved." }`.
   */
- });
+  //#endregion Get Single User By Id Summary
+
+  const { id } = req.params;
+
+  db.findById(id)
+    .then(users => {
+      // console.log(`GET /api/users/:id findById(${id}): \n`, users);
+      if (users) {
+        res.status(200).json({ success: true, users });
+      } else {
+        res.status(500).json({ success: false, errorMessage: "The user with the specified ID does not exist." });
+      }
+    })
+    .catch(err => {
+      res.status(500).json({ success: false, errorMessage: "The user information could not be retrieved." });
+    });
+});
 
 server.put('/api/users/:id', (req, res) => {
   /*
