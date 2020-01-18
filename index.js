@@ -215,7 +215,7 @@ server.delete('/api/users/:id', (req, res) => {
         .then(userIdRemoved => {
           console.log(`DELETE /api/users/:id remove(${id}): \n`, userIdRemoved);
           if (userIdRemoved) {
-            res.status(200).json({ success: true, userIdRemoved: userIdRemoved });
+            res.status(204);
           }
         })
         .catch(err => {
