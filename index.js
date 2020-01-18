@@ -98,7 +98,7 @@ server.get('/api/users', (req, res) => {
   db.find()
     .then(users => {
       console.log(`GET /api/users/ find(): \n`, users);
-      res.status(200).json({ success: true, users });
+      res.status(200).json({ success: true, users: users });
     })
     .catch(err => {
       res.status(500).json({ success: false, errorMessage: "The users information could not be retrieved." });
@@ -125,7 +125,7 @@ server.get('/api/users/:id', (req, res) => {
 
   db.findById(id)
     .then(user => {
-      console.log(`GET /api/users/:id findById(${id}): \n`, users);
+      console.log(`GET /api/users/:id findById(${id}): \n`, user);
       if (user) {
         res.status(200).json({ success: true, user });
       } else {
