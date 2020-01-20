@@ -10,6 +10,32 @@
 			"item": [
 				{
 					"name": "POST /api/users (missing bio)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "8b6bd3b5-3913-4ebd-937c-93f56dae29a5",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Failure', () => {",
+									"    pm.response.to.have.status(400);",
+									"    pm.expect(res.success).to.equal(false);",
+									"});",
+									"",
+									"pm.test('Data Size', () => {",
+									"    pm.expect(res.users).to.be.undefined;",
+									"});",
+									"",
+									"pm.test('Data Value(s)', () => {",
+									"    pm.expect(res.message).to.equal(\"Please provide name and bio for the user.\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -119,18 +145,20 @@
 							"script": {
 								"id": "436b995e-3b63-41da-a602-8b971eaeb864",
 								"exec": [
-									"pm.test('Success'), () => {",
-									"    pm.expect(pm.response.code).to.equal(400);",
-									"    pm.expect(pm.response.body.success).to.equal(false);",
-									"}",
+									"var res = pm.response.json();",
 									"",
-									"pm.test('Data Size'), () => {",
-									"    pm.expect(pm.response.body.users).to.be.null;",
-									"}",
+									"pm.test('Failure', () => {",
+									"    pm.response.to.have.status(400);",
+									"    pm.expect(res.success).to.equal(false);",
+									"});",
 									"",
-									"pm.test('Data Value(s)'), () => {",
-									"    pm.expect(pm.response.body.message).to.be(\"Please provide name and bio for the user.\");",
-									"}",
+									"pm.test('Data Size', () => {",
+									"    pm.expect(res.users).to.be.undefined;",
+									"});",
+									"",
+									"pm.test('Data Value(s)', () => {",
+									"    pm.expect(res.message).to.equal(\"Please provide name and bio for the user.\");",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -240,6 +268,32 @@
 				},
 				{
 					"name": "POST /api/users (valid)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "84d20fc1-f559-4506-8cda-8c9c242e8369",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Success', () => {",
+									"    pm.response.to.have.status(201);",
+									"    pm.expect(res.success).to.equal(true);",
+									"});",
+									"",
+									"pm.test('Data Value(s)', () => {",
+									"    pm.expect(res.user.id).to.be.at.least(3);",
+									"});",
+									"",
+									"//Store generated User ID for reuse in subsequent tests",
+									"var uid = res.user.id;",
+									"pm.collectionVariables.set(\"UserID\", uid);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -355,13 +409,21 @@
 							"script": {
 								"id": "b1876bfc-1bcb-4802-bc06-71e8c6c921aa",
 								"exec": [
-									"pm.test('Success'), () => {",
-									"    pm.expect(pm.response.code).to.equal(200);",
-									"    pm.expect(pm.response.body.success).to.equal(true);",
-									"    pm.expect(pm.response.body.users.length).to.be.greaterThanOrEqualTo(2);",
-									"    pm.expect(pm.response.body.users[0].name).to.be(\"Samwise Gamgee\");",
-									"    pm.expect(pm.response.body.users[1].name).to.be(\"Frodo Baggins\");",
-									"}",
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.equal(true);",
+									"});",
+									"",
+									"pm.test('Data Size', () => {",
+									"    pm.expect(res.users.length).to.be.at.least(2);",
+									"});",
+									"",
+									"pm.test('Data Value(s)', () => {",
+									"    pm.expect(res.users[0].name).to.equal(\"Samwise Gamgee\");",
+									"    pm.expect(res.users[1].name).to.equal(\"Frodo Baggins\");",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -480,18 +542,16 @@
 							"script": {
 								"id": "a935735f-f00c-49cb-b097-afdfcc2f6613",
 								"exec": [
-									"pm.test('Success'), () => {",
-									"    pm.expect(pm.response.code).to.equal(200);",
-									"    pm.expect(pm.response.body.success).to.equal(true);",
-									"}",
+									"var res = pm.response.json();",
 									"",
-									"pm.test('Data Size'), () => {",
-									"    pm.expect(pm.response.body.users.length).to.be(1);",
-									"}",
+									"pm.test('Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.equal(true);",
+									"});",
 									"",
-									"pm.test('Data Value(s)'), () => {",
-									"    pm.expect(pm.response.body.users[0].name).to.be(\"Samwise Gamgee\");",
-									"}",
+									"pm.test('Data Value(s)', () => {",
+									"    pm.expect(res.user.name).to.equal(\"Jane Doe\");",
+									"});",
 									""
 								],
 								"type": "text/javascript"
@@ -521,7 +581,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/api/users/1",
+							"raw": "http://localhost:4000/api/users/{{UserID}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -530,7 +590,7 @@
 							"path": [
 								"api",
 								"users",
-								"1"
+								"{{UserID}}"
 							]
 						}
 					},
@@ -606,6 +666,32 @@
 				},
 				{
 					"name": "GET /api/users/:id (not found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "133dafd8-cfda-4da0-9b8a-3190d8c83402",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Failure', () => {",
+									"    pm.response.to.have.status(404);",
+									"    pm.expect(res.success).to.equal(false);",
+									"});",
+									"",
+									"pm.test('Data Size', () => {",
+									"    pm.expect(res.users).to.be.undefined;",
+									"});",
+									"",
+									"pm.test('Error Message', () => {",
+									"    pm.expect(res.errorMessage).to.equal(\"The user with the specified ID does not exist.\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -720,6 +806,28 @@
 			"item": [
 				{
 					"name": "PUT /api/users/:id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "ba7c0b18-8c9b-4035-a568-56f7abaf3129",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.equal(true);",
+									"});",
+									"",
+									"pm.test('Data Value(s)', () => {",
+									"    pm.expect(res.userIdUpdated).to.equal(pm.collectionVariables.get('UserID'));",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -740,7 +848,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/api/users/3",
+							"raw": "http://localhost:4000/api/users/{{UserID}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -749,7 +857,7 @@
 							"path": [
 								"api",
 								"users",
-								"3"
+								"{{UserID}}"
 							]
 						}
 					},
@@ -825,6 +933,32 @@
 				},
 				{
 					"name": "PUT /api/users/:id (not found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "0b849a9d-5d2f-4e2e-8525-e98fabc2ebd1",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Status: 404 Not Found', () => {",
+									"    pm.response.to.have.status(404);",
+									"    pm.expect(pm.response.status).to.equal(\"Not Found\");",
+									"});",
+									"",
+									"pm.test(\"Does not exist\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"The user with the specified ID does not exist.\");",
+									"});",
+									"",
+									"pm.test('Success=false', () => {",
+									"    pm.expect(res.success).to.be.false;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -930,6 +1064,32 @@
 				},
 				{
 					"name": "PUT /api/users/:id (missing bio)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "afa213a4-8aad-44b4-baa1-50a06be4fe81",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Status: 400 Bad Request', () => {",
+									"    pm.response.to.have.status(400);",
+									"    pm.expect(pm.response.status).to.equal(\"Bad Request\");",
+									"});",
+									"",
+									"pm.test(\"Does not exist\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"Please provide name and bio for the user.\");",
+									"});",
+									"",
+									"pm.test('Success=false', () => {",
+									"    pm.expect(res.success).to.be.false;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -950,7 +1110,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/api/users/3",
+							"raw": "http://localhost:4000/api/users/{{UserID}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -959,7 +1119,7 @@
 							"path": [
 								"api",
 								"users",
-								"3"
+								"{{UserID}}"
 							]
 						}
 					},
@@ -1035,6 +1195,32 @@
 				},
 				{
 					"name": "PUT /api/users/:id (missing name)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "2d5cd2b5-aadf-4cc7-8d92-abc722298c14",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Status: 400 Bad Request', () => {",
+									"    pm.response.to.have.status(400);",
+									"    pm.expect(pm.response.status).to.equal(\"Bad Request\");",
+									"});",
+									"",
+									"pm.test(\"Does not exist\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"Please provide name and bio for the user.\");",
+									"});",
+									"",
+									"pm.test('Success=false', () => {",
+									"    pm.expect(res.success).to.be.false;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -1055,7 +1241,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/api/users/3",
+							"raw": "http://localhost:4000/api/users/{{UserID}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1064,7 +1250,7 @@
 							"path": [
 								"api",
 								"users",
-								"3"
+								"{{UserID}}"
 							]
 						}
 					},
@@ -1146,6 +1332,32 @@
 			"item": [
 				{
 					"name": "DELETE /api/users/:id (not found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a76ad4c8-5756-43a8-a71d-98c639ad7158",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Status: 404 Not Found', () => {",
+									"    pm.response.to.have.status(404);",
+									"    pm.expect(pm.response.status).to.equal(\"Not Found\");",
+									"});",
+									"",
+									"pm.test(\"Does not exist\", () => {",
+									"    pm.expect(pm.response.text()).to.include(\"The user with the specified ID does not exist.\");",
+									"});",
+									"",
+									"pm.test('Success=false', () => {",
+									"    pm.expect(res.success).to.be.false;",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1261,6 +1473,26 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "ff5472e0-ad9e-406b-84d4-0b1cd9ac8bec",
+								"exec": [
+									"var res = pm.response.json();",
+									"",
+									"pm.test('Success', () => {",
+									"    pm.response.to.have.status(200);",
+									"    pm.expect(res.success).to.equal(true);",
+									"});",
+									"",
+									"pm.test('Data Value(s)', () => {",
+									"    pm.expect(res.userIdRemoved).to.equal(pm.collectionVariables.get('UserID'));",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -1283,7 +1515,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:4000/api/users/3",
+							"raw": "http://localhost:4000/api/users/{{UserID}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1292,7 +1524,7 @@
 							"path": [
 								"api",
 								"users",
-								"3"
+								"{{UserID}}"
 							]
 						}
 					},
@@ -1368,6 +1600,36 @@
 				}
 			],
 			"protocolProfileBehavior": {}
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "81005885-9980-4e6e-b9bf-0043d8f3b03c",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "d4f0b23e-bbbf-4e4e-9654-506bc8e3d5e8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "89f644cd-8939-41f8-918b-740e0f5fec56",
+			"key": "UserID",
+			"value": 5,
+			"type": "number"
 		}
 	],
 	"protocolProfileBehavior": {}
