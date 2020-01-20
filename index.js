@@ -177,7 +177,7 @@ server.put('/api/users/:id', (req, res) => {
           .then(userIdUpdated => {
             console.log(`PUT /api/users/:id update(${id}): \n`, userIdUpdated);
             if (userIdUpdated) {
-              res.status(200).json({ success: true, userIdUpdated: userIdUpdated });
+              res.status(200).json({ success: true, userIdUpdated: parseInt(id, 10) });
             }
           })
           .catch(err => {
@@ -215,7 +215,7 @@ server.delete('/api/users/:id', (req, res) => {
         .then(userIdRemoved => {
           console.log(`DELETE /api/users/:id remove(${id}): \n`, userIdRemoved);
           if (userIdRemoved) {
-            res.status(204);
+            res.status(200).json({ success: true, userIdRemoved: parseInt(id, 10) });
           }
         })
         .catch(err => {
