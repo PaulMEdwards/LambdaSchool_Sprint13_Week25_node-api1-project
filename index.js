@@ -71,7 +71,7 @@ server.post('/api/users', (req, res) => {
   //#endregion Post Summary
 
   if (!req.body.name || !req.body.bio) {
-    res.status(400).json({ success: false, message: "Please provide name and bio for the user." });
+    res.status(400).json({ success: false, errorMessage: "Please provide name and bio for the user." });
   } else {
     db.insert(req.body)
       .then(user => {
@@ -113,7 +113,7 @@ server.get('/api/users/:id', (req, res) => {
     - If the _user_ with the specified `id` is not found:
 
       - respond with HTTP status code `404` (Not Found).
-      - return the following JSON object: `{ message: "The user with the specified ID does not exist." }`.
+      - return the following JSON object: `{ errorMessage: "The user with the specified ID does not exist." }`.
 
     - If there's an error in retrieving the _user_ from the database:
       - respond with HTTP status code `500`.
@@ -145,7 +145,7 @@ server.put('/api/users/:id', (req, res) => {
     - If the _user_ with the specified `id` is not found:
 
       - respond with HTTP status code `404` (Not Found).
-      - return the following JSON object: `{ message: "The user with the specified ID does not exist." }`.
+      - return the following JSON object: `{ errorMessage: "The user with the specified ID does not exist." }`.
 
     - If the request body is missing the `name` or `bio` property:
 
@@ -168,25 +168,25 @@ server.put('/api/users/:id', (req, res) => {
   const { id } = req.params;
 
   if (!req.body.name || !req.body.bio) {
-    res.status(400).json({ success: false, message: "Please provide name and bio for the user." });
+    res.status(400).json({ success: false, errorMessage: "Please provide name and bio for the user." });
   } else {
     db.findById(id)
       .then(user => {
         if (user) {
           db.update(id, req.body)
-          .then(userIdUpdated => {
-            console.log(`PUT /api/users/:id update(${id}): \n`, userIdUpdated);
-            if (userIdUpdated) {
-              res.status(200).json({ success: true, userIdUpdated: parseInt(id, 10) });
-            }
-          })
-          .catch(err => {
-            res.status(500).json({ success: false, errorMessage: "The user information could not be modified." });
-          });
+            .then(userIdUpdated => {
+              console.log(`PUT /api/users/:id update(${id}): \n`, userIdUpdated);
+              if (userIdUpdated) {
+                res.status(200).json({ success: true, userIdUpdated: parseInt(id, 10) });
+              }
+            })
+            .catch(err => {
+              res.status(500).json({ success: false, errorMessage: "The user information could not be modified." });
+            });
         } else {
           res.status(404).json({ success: false, errorMessage: "The user with the specified ID does not exist." });
         }
-    });
+      });
   }
 });
 
@@ -198,7 +198,7 @@ server.delete('/api/users/:id', (req, res) => {
     - If the _user_ with the specified `id` is not found:
 
       - respond with HTTP status code `404` (Not Found).
-      - return the following JSON object: `{ message: "The user with the specified ID does not exist." }`.
+      - return the following JSON object: `{ errorMessage: "The user with the specified ID does not exist." }`.
 
     - If there's an error in removing the _user_ from the database:
       - respond with HTTP status code `500`.
@@ -212,15 +212,15 @@ server.delete('/api/users/:id', (req, res) => {
     .then(user => {
       if (user) {
         db.remove(id, req.body)
-        .then(userIdRemoved => {
-          console.log(`DELETE /api/users/:id remove(${id}): \n`, userIdRemoved);
-          if (userIdRemoved) {
-            res.status(200).json({ success: true, userIdRemoved: parseInt(id, 10) });
-          }
-        })
-        .catch(err => {
-          res.status(500).json({ success: false, errorMessage: "The user information could not be removed." });
-        });
+          .then(userIdRemoved => {
+            console.log(`DELETE /api/users/:id remove(${id}): \n`, userIdRemoved);
+            if (userIdRemoved) {
+              res.status(200).json({ success: true, userIdRemoved: parseInt(id, 10) });
+            }
+          })
+          .catch(err => {
+            res.status(500).json({ success: false, errorMessage: "The user information could not be removed." });
+          });
       } else {
         res.status(404).json({ success: false, errorMessage: "The user with the specified ID does not exist." });
       }
